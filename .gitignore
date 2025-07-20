@@ -1,0 +1,17 @@
+# Geral
+node_modules/
+.env
+*.log
+
+# React Native
+android/
+ios/
+.expo/
+.expo-shared/
+
+# VSCode
+.vscode/
+
+# Sistema
+.DS_Store
+Thumbs.db

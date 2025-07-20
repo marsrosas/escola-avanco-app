@@ -12,9 +12,13 @@ A aplicação consiste em um projeto de aplicativo mobile + API RESTful desenvol
 O repositório está organizado da seguinte forma:
 
 escola-avanco/
+
 ├── back-end/ # Código-fonte da API (Express + Node.js)
+
 ├── front-end/ # Aplicação mobile (React Native com Expo)
+
 ├── .gitignore # Arquivo que define o que não deve ser enviado ao Git
+
 ├── README.md # Este arquivo de instrução do projeto
 
 ### 📄 .gitignore

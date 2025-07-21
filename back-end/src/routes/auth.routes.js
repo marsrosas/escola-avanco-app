@@ -1,21 +1,28 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-
+const users = require('../../users');
 const router = express.Router();
 
 router.post('/login', (req, res) => {
-  const { email, password } = req.body;
-
-  // Simulação de validação
-  if (email === 'professor@avanço.com' && password === '123456') {
-    const user = { id: 1, name: 'Marselle Rosas', email };
-
-    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-    return res.json({ token });
+  const { username, password } = req.body;
+  const user = users.find(u => u.username === username && u.password === password);
+  if (!user) {
+    return res.status(401).json({ message: 'Usuário ou senha inválidos' });
   }
-
-  return res.status(401).json({ message: 'Credenciais inválidas' });
+  // Inclua o role no payload do JWT
+  const token = jwt.sign(
+    { id: user.id, username: user.username, role: user.role },
+    'seuSegredoJWT', // Troque por variável de ambiente em produção
+    { expiresIn: '1d' }
+  );
+  res.json({
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      role: user.role
+    }
+  });
 });
 
 module.exports = router;

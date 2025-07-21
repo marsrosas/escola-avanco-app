@@ -11,7 +11,16 @@ export default function LoginScreen({ navigation }: any) {
     try {
       const data = await login(email, password);
       await AsyncStorage.setItem('token', data.token);
-      navigation.replace('Home');
+      await AsyncStorage.setItem('role', data.user.role);
+      await AsyncStorage.setItem('username', data.user.username);
+
+      if (data.user.role === 'professor') {
+        navigation.replace('ProfessorHome');
+      } else if (data.user.role === 'aluno') {
+        navigation.replace('StudentHome');
+      } else {
+        navigation.replace('Home');
+      }
     } catch (err: any) {
       Alert.alert('Erro de login', err.message || 'Falha ao entrar');
     }

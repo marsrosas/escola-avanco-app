@@ -1,6 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const verifyToken = require('../middleware/auth.middleware');
+const authorizeRoles = require('../middleware/role.middleware');
 
 const router = express.Router();
 
@@ -74,6 +75,14 @@ router.delete('/teachers/:id', verifyToken, (req, res) => {
   const { password: _, ...publicDeleted } = deleted;
 
   res.json({ message: 'Professor excluído com sucesso', professor: publicDeleted });
+});
+
+router.use(verifyToken);
+
+// Apenas professores podem criar, editar ou excluir aulas
+router.post('/criar-aula', authorizeRoles('professor'), (req, res) => {
+  // lógica para criar aula
+  res.json({ message: 'Aula criada!' });
 });
 
 module.exports = router;

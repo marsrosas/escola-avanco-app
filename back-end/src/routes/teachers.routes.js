@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const verifyToken = require('../middleware/auth.middleware');
-const authorizeRoles = require('../middleware/role.middleware');
+const authenticateToken = require('../middlewares/auth.middleware');
+const authorizeRoles = require('../middlewares/role.middleware');
 
 const router = express.Router();
 
@@ -15,13 +15,13 @@ let teachers = [
 ];
 
 // GET /api/teachers
-router.get('/teachers', verifyToken, (req, res) => {
+router.get('/teachers', authenticateToken, (req, res) => {
   const publicData = teachers.map(({ password, ...t }) => t);
   res.json(publicData);
 });
 
 // POST /api/teachers
-router.post('/teachers', verifyToken, (req, res) => {
+router.post('/teachers', authenticateToken, (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
@@ -45,7 +45,7 @@ router.post('/teachers', verifyToken, (req, res) => {
 });
 
 // PUT /api/teachers/:id
-router.put('/teachers/:id', verifyToken, (req, res) => {
+router.put('/teachers/:id', authenticateToken, (req, res) => {
   const teacherId = parseInt(req.params.id);
   const { name, email, password } = req.body;
 
@@ -66,7 +66,7 @@ router.put('/teachers/:id', verifyToken, (req, res) => {
 });
 
 // DELETE /api/teachers/:id
-router.delete('/teachers/:id', verifyToken, (req, res) => {
+router.delete('/teachers/:id', authenticateToken, (req, res) => {
   const teacherId = parseInt(req.params.id);
   const index = teachers.findIndex(t => t.id === teacherId);
   if (index === -1) return res.status(404).json({ message: 'Professor não encontrado' });
@@ -77,7 +77,7 @@ router.delete('/teachers/:id', verifyToken, (req, res) => {
   res.json({ message: 'Professor excluído com sucesso', professor: publicDeleted });
 });
 
-router.use(verifyToken);
+router.use(authenticateToken);
 
 // Apenas professores podem criar, editar ou excluir aulas
 router.post('/criar-aula', authorizeRoles('professor'), (req, res) => {

@@ -11,8 +11,10 @@ import {
   TextInput,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/AppNavigator'; // ajuste o caminho se necessário
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getPosts } from '../services/postService';
+import { getPosts, deletePost } from '../services/postService';
 
 interface Post {
   id: number;
@@ -23,17 +25,50 @@ interface Post {
   createdAt: string;
 }
 
+type HomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
 export default function HomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<HomeScreenNavigationProp>();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [search, setSearch] = useState('');
+  const [role, setRole] = useState('');
+  const [username, setUsername] = useState('');
 
   async function handleLogout() {
     await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('role');
+    await AsyncStorage.removeItem('username');
     navigation.navigate('Login' as never);
+  }
+
+  function handleEdit(post: Post) {
+    navigation.navigate('EditPost', { post });
+  }
+
+  async function handleDelete(postId: number) {
+    Alert.alert(
+      'Excluir Aula',
+      'Tem certeza que deseja excluir esta aula?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deletePost(postId); // Implemente no seu postService
+              setPosts(posts.filter(p => p.id !== postId));
+              Alert.alert('Aula excluída com sucesso!');
+            } catch (error: any) {
+              Alert.alert('Erro', error.message || 'Erro ao excluir aula');
+            }
+          }
+        }
+      ]
+    );
   }
 
   useEffect(() => {
@@ -57,12 +92,17 @@ export default function HomeScreen() {
     fetchData();
   }, []);
 
-  // Filtra os posts conforme o texto digitado
+  useEffect(() => {
+    AsyncStorage.getItem('role').then(r => setRole(r || ''));
+    AsyncStorage.getItem('username').then(u => setUsername(u || ''));
+  }, []);
+
+  // Filtro seguro para busca
   const filteredPosts = posts.filter(
     (item) =>
-      item.title.toLowerCase().includes(search.toLowerCase()) ||
-      item.subject.toLowerCase().includes(search.toLowerCase()) ||
-      item.author.toLowerCase().includes(search.toLowerCase())
+      (item.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
+      (item.subject?.toLowerCase() || '').includes(search.toLowerCase()) ||
+      (item.author?.toLowerCase() || '').includes(search.toLowerCase())
   );
 
   if (loading)
@@ -85,13 +125,16 @@ export default function HomeScreen() {
         }}
       />
 
-      <Button title="Criar Nova Aula" onPress={() => navigation.navigate('CreatePost' as never)} />
+      {role === 'professor' && (
+        <Button title="Criar Nova Aula" onPress={() => navigation.navigate('CreatePost')} />
+      )}
       <View style={{ marginVertical: 8 }} />
       <Button title="Sair" onPress={handleLogout} />
 
       <FlatList
         data={filteredPosts}
         keyExtractor={(item) => item.id.toString()}
+        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>Nenhuma aula encontrada.</Text>}
         renderItem={({ item }: { item: Post }) => (
           <View style={{ marginBottom: 20 }}>
             <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
@@ -112,6 +155,12 @@ export default function HomeScreen() {
             >
               <Text style={{ color: '#fff' }}>Detalhes</Text>
             </TouchableOpacity>
+            {role === 'professor' && item.author === username && (
+              <>
+                <Button title="Editar" onPress={() => handleEdit(item)} />
+                <Button title="Excluir" onPress={() => handleDelete(item.id)} />
+              </>
+            )}
           </View>
         )}
       />

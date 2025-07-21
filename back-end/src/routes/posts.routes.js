@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const authenticateToken = require('../middleware/auth.middleware');
+const authenticateToken = require('../middlewares/auth.middleware');
+const authorizeRoles = require('../middlewares/role.middleware');
 
-const posts = [];
+let posts = [];
 
 router.post('/posts', authenticateToken, (req, res) => {
   const { title, description, subject } = req.body;
@@ -29,6 +30,16 @@ router.post('/posts', authenticateToken, (req, res) => {
 router.get('/posts', authenticateToken, (req, res) => {
   const sortedPosts = [...posts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json(sortedPosts);
+});
+
+router.delete('/posts/:id', authenticateToken, (req, res) => {
+  const postId = parseInt(req.params.id, 10);
+  const initialLength = posts.length;
+  posts = posts.filter(p => p.id !== postId);
+  if (posts.length === initialLength) {
+    return res.status(404).json({ message: 'Post não encontrado' });
+  }
+  res.json({ message: 'Post deletado com sucesso' });
 });
 
 module.exports = router;

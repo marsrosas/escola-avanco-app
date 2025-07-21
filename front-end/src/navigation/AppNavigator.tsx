@@ -9,9 +9,19 @@ export type RootStackParamList = {
   Login: undefined;
   Home: undefined;
   CreatePost: undefined;
+  EditPost: { post: Post }; // <-- Adicione esta linha
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
+type Post = {
+  id: number;
+  title: string;
+  description: string;
+  subject: string;
+  author: string;
+  createdAt: string;
+};
 
 export default function AppNavigator() {
   return (

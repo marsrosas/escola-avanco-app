@@ -11,13 +11,13 @@ app.use(express.json());
 
 // Importação das rotas (uma vez só)
 const authRoutes = require('./routes/auth.routes');
-const postRoutes = require('./routes/posts.routes');
+const postsRoutes = require('./routes/posts.routes');
 const teacherRoutes = require('./routes/teachers.routes');
 const studentRoutes = require('./routes/students.routes');
 
 // Registro das rotas
 app.use('/api', authRoutes);
-app.use('/api', postRoutes);
+app.use('/api', postsRoutes);
 app.use('/api', teacherRoutes);
 app.use('/api', studentRoutes);
 

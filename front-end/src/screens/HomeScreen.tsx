@@ -179,10 +179,15 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>{selectedPost?.title}</Text>
-            <Text style={styles.cardSubject}>{selectedPost?.subject} • {selectedPost && new Date(selectedPost.createdAt).toLocaleDateString()}</Text>
-            <Text style={styles.cardAuthor}>Autor: {selectedPost?.author}</Text>
-            <Text style={{ marginBottom: 16 }}>{selectedPost?.description}</Text>
-            <Button title="Fechar" onPress={() => setModalVisible(false)} />
+            <Text style={styles.modalSubject}>{selectedPost?.subject} • {selectedPost && new Date(selectedPost.createdAt).toLocaleDateString()}</Text>
+            <Text style={styles.modalAuthor}>Autor: {selectedPost?.author}</Text>
+            <Text style={styles.modalDescription}>{selectedPost?.description}</Text>
+            <TouchableOpacity 
+              style={styles.modalCloseButton}
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalCloseButtonText}>FECHAR</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -290,21 +295,68 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(109, 24, 78, 0.8)',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    padding: 20,
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#f7eaea',
     padding: 24,
-    borderRadius: 8,
-    width: '85%'
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#6d184e',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  modalSubject: {
+    color: '#6d184e',
     marginBottom: 8,
+    fontWeight: '600',
+    fontSize: 16,
+    textAlign: 'center',
+  },
+  modalAuthor: {
+    fontStyle: 'italic',
+    color: '#666',
+    marginBottom: 16,
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  modalDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#333',
+    marginBottom: 24,
+    textAlign: 'justify',
+  },
+  modalCloseButton: {
+    backgroundColor: '#6d184e',
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  modalCloseButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+    letterSpacing: 1,
   },
 });
 

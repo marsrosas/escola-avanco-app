@@ -1,9 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../middlewares/auth.middleware');
-const authorizeRoles = require('../middlewares/role.middleware');
 
-let posts = [];
+let posts = [
+  {
+    id: 1,
+    title: 'Matemática Básica',
+    description: 'Introdução à matemática.',
+    subject: 'Matemática',
+    author: 'Livia Moura',
+    createdAt: new Date()
+  },
+  {
+    id: 2,
+    title: 'História do Brasil',
+    description: 'Aula sobre o período colonial.',
+    subject: 'História',
+    author: 'Guilherme Silva',
+    createdAt: new Date()
+  }
+];
 
 router.post('/posts', authenticateToken, (req, res) => {
   const { title, description, subject } = req.body;
@@ -19,7 +35,7 @@ router.post('/posts', authenticateToken, (req, res) => {
     title,
     description,
     subject,
-    author: req.user.name, // usuário logado
+    author: req.user.username,
     createdAt: new Date()
   };
 

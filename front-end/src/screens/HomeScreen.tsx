@@ -9,10 +9,11 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
+  StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../navigation/AppNavigator'; // ajuste o caminho se necessário
+import type { RootStackParamList } from '../navigation/AppNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getPosts, deletePost } from '../services/postService';
 
@@ -41,7 +42,7 @@ export default function HomeScreen() {
     await AsyncStorage.removeItem('token');
     await AsyncStorage.removeItem('role');
     await AsyncStorage.removeItem('username');
-    navigation.navigate('Login' as never);
+    navigation.navigate('Login');
   }
 
   function handleEdit(post: Post) {
@@ -59,7 +60,7 @@ export default function HomeScreen() {
           style: 'destructive',
           onPress: async () => {
             try {
-              await deletePost(postId); // Implemente no seu postService
+              await deletePost(postId);
               setPosts(posts.filter(p => p.id !== postId));
               Alert.alert('Aula excluída com sucesso!');
             } catch (error: any) {
@@ -75,7 +76,7 @@ export default function HomeScreen() {
     async function fetchData() {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        navigation.navigate('Login' as never);
+        navigation.navigate('Login');
         return;
       }
 
@@ -97,7 +98,6 @@ export default function HomeScreen() {
     AsyncStorage.getItem('username').then(u => setUsername(u || ''));
   }, []);
 
-  // Filtro seguro para busca
   const filteredPosts = posts.filter(
     (item) =>
       (item.title?.toLowerCase() || '').includes(search.toLowerCase()) ||
@@ -109,58 +109,63 @@ export default function HomeScreen() {
     return <ActivityIndicator style={{ marginTop: 50 }} size="large" />;
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text style={{ fontSize: 24, marginBottom: 16 }}>Aulas</Text>
+    <View style={styles.container}>
+      <Text style={styles.header}>Todas as Aulas</Text>
 
       <TextInput
         placeholder="Buscar por título, matéria ou autor"
         value={search}
         onChangeText={setSearch}
-        style={{
-          borderWidth: 1,
-          borderColor: '#ccc',
-          borderRadius: 6,
-          padding: 8,
-          marginBottom: 16,
-        }}
+        style={styles.input}
+        placeholderTextColor="#888"
       />
 
       {role === 'professor' && (
-        <Button title="Criar Nova Aula" onPress={() => navigation.navigate('CreatePost')} />
+        <TouchableOpacity style={styles.postButton} onPress={() => navigation.navigate('CreatePost')}>
+          <Text style={styles.postButtonText}>+ Postar Aula</Text>
+        </TouchableOpacity>
       )}
-      <View style={{ marginVertical: 8 }} />
-      <Button title="Sair" onPress={handleLogout} />
+
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+        <Text style={styles.logoutButtonText}>Sair</Text>
+      </TouchableOpacity>
 
       <FlatList
         data={filteredPosts}
         keyExtractor={(item) => item.id.toString()}
-        ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>Nenhuma aula encontrada.</Text>}
+        ListEmptyComponent={<Text style={styles.emptyText}>Nenhuma aula encontrada.</Text>}
         renderItem={({ item }: { item: Post }) => (
-          <View style={{ marginBottom: 20 }}>
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{item.title}</Text>
-            <Text style={{ color: '#666' }}>{item.subject} • {new Date(item.createdAt).toLocaleDateString()}</Text>
-            <Text style={{ fontStyle: 'italic', color: '#888' }}>Autor: {item.author}</Text>
-            <TouchableOpacity
-              style={{
-                marginTop: 8,
-                backgroundColor: '#2196F3',
-                padding: 8,
-                borderRadius: 4,
-                alignSelf: 'flex-start'
-              }}
-              onPress={() => {
-                setSelectedPost(item);
-                setModalVisible(true);
-              }}
-            >
-              <Text style={{ color: '#fff' }}>Detalhes</Text>
-            </TouchableOpacity>
-            {role === 'professor' && item.author === username && (
-              <>
-                <Button title="Editar" onPress={() => handleEdit(item)} />
-                <Button title="Excluir" onPress={() => handleDelete(item.id)} />
-              </>
-            )}
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>{item.title}</Text>
+            <Text style={styles.cardSubject}>{item.subject} • {new Date(item.createdAt).toLocaleDateString()}</Text>
+            <Text style={styles.cardAuthor}>Autor: {item.author}</Text>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: '#1E40AF' }]}
+                onPress={() => {
+                  setSelectedPost(item);
+                  setModalVisible(true);
+                }}
+              >
+                <Text style={styles.actionButtonText}>Detalhes</Text>
+              </TouchableOpacity>
+              {role === 'professor' && item.author === username && (
+                <>
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: '#22C55E' }]}
+                    onPress={() => handleEdit(item)}
+                  >
+                    <Text style={styles.actionButtonText}>Editar</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.actionButton, { backgroundColor: '#EF4444' }]}
+                    onPress={() => handleDelete(item.id)}
+                  >
+                    <Text style={styles.actionButtonText}>Excluir</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
           </View>
         )}
       />
@@ -171,21 +176,11 @@ export default function HomeScreen() {
         animationType="slide"
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'center',
-          alignItems: 'center'
-        }}>
-          <View style={{
-            backgroundColor: '#fff',
-            padding: 24,
-            borderRadius: 8,
-            width: '85%'
-          }}>
-            <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{selectedPost?.title}</Text>
-            <Text style={{ color: '#666', marginBottom: 8 }}>{selectedPost?.subject} • {selectedPost && new Date(selectedPost.createdAt).toLocaleDateString()}</Text>
-            <Text style={{ fontStyle: 'italic', color: '#888', marginBottom: 8 }}>Autor: {selectedPost?.author}</Text>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>{selectedPost?.title}</Text>
+            <Text style={styles.cardSubject}>{selectedPost?.subject} • {selectedPost && new Date(selectedPost.createdAt).toLocaleDateString()}</Text>
+            <Text style={styles.cardAuthor}>Autor: {selectedPost?.author}</Text>
             <Text style={{ marginBottom: 16 }}>{selectedPost?.description}</Text>
             <Button title="Fechar" onPress={() => setModalVisible(false)} />
           </View>
@@ -194,6 +189,124 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#6d184e',
+    padding: 16,
+    paddingTop: 40,
+  },
+  header: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#fff',
+    alignSelf: 'center',
+    marginBottom: 18,
+    letterSpacing: 1,
+  },
+  input: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#a1a1aa',
+  },
+  postButton: {
+    backgroundColor: '#312e81',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  postButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  logoutButton: {
+    backgroundColor: '#fff',
+    padding: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: '#a1a1aa',
+    alignSelf: 'flex-end',
+    width: 80,
+  },
+  logoutButtonText: {
+    color: '#b91c1c',
+    fontWeight: 'bold',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#6d184e',
+    marginBottom: 4,
+  },
+  cardSubject: {
+    color: '#6d184e',
+    marginBottom: 4,
+    fontWeight: '600',
+  },
+  cardAuthor: {
+    fontStyle: 'italic',
+    color: '#888',
+    marginBottom: 8,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginTop: 8,
+  },
+  actionButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+    color: '#fff',
+    fontSize: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  modalContent: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 8,
+    width: '85%'
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#6d184e',
+    marginBottom: 8,
+  },
+});
 
 
 

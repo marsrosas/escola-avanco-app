@@ -12,7 +12,7 @@ router.post('/login', (req, res) => {
   // Inclua o role no payload do JWT
   const token = jwt.sign(
     { id: user.id, username: user.username, role: user.role },
-    'seuSegredoJWT', // Troque por variável de ambiente em produção
+    'seuSegredoJWT',
     { expiresIn: '1d' }
   );
   res.json({

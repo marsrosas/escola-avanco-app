@@ -6,7 +6,7 @@ function authMiddleware(req, res, next) {
 
   const [, token] = authHeader.split(' ');
   try {
-    const decoded = jwt.verify(token, 'seuSegredoJWT');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'seuSegredoJWT');
     req.user = decoded; // Inclui id, username e role
     next();
   } catch (err) {

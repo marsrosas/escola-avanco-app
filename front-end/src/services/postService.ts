@@ -2,7 +2,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api' // ou o IP do seu backend
+  baseURL: 'http://172.25.61.227:3000/api' // IP do WSL - mesmo do authService
 });
 
 export async function getPosts() {

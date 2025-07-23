@@ -2,8 +2,13 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const connectDB = require('./config/database');
+const seedDatabase = require('./config/seedDatabase');
 
 const app = express();
+
+// Conectar ao MongoDB
+connectDB();
 
 // Middlewares básicos
 app.use(cors());
@@ -28,6 +33,11 @@ app.get('/', (req, res) => {
 
 // Inicialização do servidor
 const PORT = process.env.PORT || 3000;
+app.listen(PORT, async () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  // Popular banco de dados com dados iniciais
+  await seedDatabase();
+});
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

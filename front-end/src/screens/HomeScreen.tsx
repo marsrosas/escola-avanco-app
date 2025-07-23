@@ -15,7 +15,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../navigation/AppNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getPosts, deletePost } from '../services/postService';
+import { getPosts, deletePost, updatePost } from '../services/postService';
 
 interface Post {
   id: number;
@@ -33,10 +33,18 @@ export default function HomeScreen() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [postToDelete, setPostToDelete] = useState<number | null>(null);
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('');
   const [username, setUsername] = useState('');
+  
+  // Estados para edição
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editSubject, setEditSubject] = useState('');
 
   async function handleLogout() {
     await AsyncStorage.removeItem('token');
@@ -46,30 +54,61 @@ export default function HomeScreen() {
   }
 
   function handleEdit(post: Post) {
-    navigation.navigate('EditPost', { post });
+    setSelectedPost(post);
+    setEditTitle(post.title);
+    setEditDescription(post.description);
+    setEditSubject(post.subject);
+    setEditModalVisible(true);
   }
 
-  async function handleDelete(postId: number) {
-    Alert.alert(
-      'Excluir Aula',
-      'Tem certeza que deseja excluir esta aula?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await deletePost(postId);
-              setPosts(posts.filter(p => p.id !== postId));
-              Alert.alert('Aula excluída com sucesso!');
-            } catch (error: any) {
-              Alert.alert('Erro', error.message || 'Erro ao excluir aula');
-            }
-          }
-        }
-      ]
-    );
+  function handleDelete(postId: number) {
+    setPostToDelete(postId);
+    setDeleteModalVisible(true);
+  }
+
+  async function confirmDelete() {
+    if (postToDelete) {
+      try {
+        await deletePost(postToDelete);
+        setPosts(posts.filter(p => p.id !== postToDelete));
+        setDeleteModalVisible(false);
+        setPostToDelete(null);
+        Alert.alert('Sucesso', 'Aula excluída com sucesso!');
+      } catch (error: any) {
+        Alert.alert('Erro', error.message || 'Erro ao excluir aula');
+      }
+    }
+  }
+
+  async function handleUpdatePost() {
+    if (!editTitle || !editDescription || !editSubject) {
+      Alert.alert('Erro', 'Preencha todos os campos');
+      return;
+    }
+
+    if (selectedPost) {
+      try {
+        const updatedPost = {
+          title: editTitle,
+          description: editDescription,
+          subject: editSubject
+        };
+        
+        await updatePost(selectedPost.id, updatedPost);
+        
+        // Atualizar a lista local
+        setPosts(posts.map(post => 
+          post.id === selectedPost.id 
+            ? { ...post, ...updatedPost }
+            : post
+        ));
+        
+        setEditModalVisible(false);
+        Alert.alert('Sucesso', 'Aula atualizada com sucesso!');
+      } catch (error: any) {
+        Alert.alert('Erro', error.message || 'Erro ao atualizar aula');
+      }
+    }
   }
 
   useEffect(() => {
@@ -170,6 +209,96 @@ export default function HomeScreen() {
         )}
       />
 
+      {/* Modal de Edição */}
+      <Modal
+        visible={editModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.editModalContent}>
+            <Text style={styles.modalTitle}>Editar Aula</Text>
+            
+            <Text style={styles.inputLabel}>Título da Aula</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Digite o título da aula"
+              value={editTitle}
+              onChangeText={setEditTitle}
+            />
+            
+            <Text style={styles.inputLabel}>Matéria</Text>
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Digite a matéria"
+              value={editSubject}
+              onChangeText={setEditSubject}
+            />
+            
+            <Text style={styles.inputLabel}>Descrição</Text>
+            <TextInput
+              style={[styles.modalInput, styles.textArea]}
+              placeholder="Digite a descrição da aula"
+              value={editDescription}
+              onChangeText={setEditDescription}
+              multiline={true}
+              numberOfLines={4}
+            />
+            
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity 
+                style={styles.modalCancelButton}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.modalCancelButtonText}>CANCELAR</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.modalSaveButton}
+                onPress={handleUpdatePost}
+              >
+                <Text style={styles.modalSaveButtonText}>SALVAR</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Confirmação de Exclusão */}
+      <Modal
+        visible={deleteModalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.deleteModalContent}>
+            <Text style={styles.modalTitle}>Excluir Aula</Text>
+            <Text style={styles.deleteModalText}>
+              Tem certeza que deseja excluir esta aula? Esta ação não pode ser desfeita.
+            </Text>
+            
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity 
+                style={styles.modalCancelButton}
+                onPress={() => setDeleteModalVisible(false)}
+              >
+                <Text style={styles.modalCancelButtonText}>CANCELAR</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.modalDeleteButton}
+                onPress={confirmDelete}
+              >
+                <Text style={styles.modalDeleteButtonText}>EXCLUIR</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Detalhes */}
       <Modal
         visible={modalVisible}
         transparent={true}
@@ -357,6 +486,106 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
     letterSpacing: 1,
+  },
+  
+  // Estilos para Modal de Edição
+  editModalContent: {
+    backgroundColor: '#f7eaea',
+    padding: 24,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '80%',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#6d184e',
+    marginBottom: 8,
+    marginTop: 8,
+  },
+  modalInput: {
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    gap: 12,
+  },
+  modalCancelButton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#6d184e',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  modalCancelButtonText: {
+    color: '#6d184e',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  modalSaveButton: {
+    flex: 1,
+    backgroundColor: '#6d184e',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  modalSaveButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  
+  // Estilos para Modal de Exclusão
+  deleteModalContent: {
+    backgroundColor: '#f7eaea',
+    padding: 24,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 350,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+  },
+  deleteModalText: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'center',
+    marginBottom: 24,
+    lineHeight: 22,
+  },
+  modalDeleteButton: {
+    flex: 1,
+    backgroundColor: '#EF4444',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  modalDeleteButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 

@@ -31,6 +31,16 @@ export async function deletePost(postId: number) {
   });
 }
 
+export async function updatePost(postId: number, post: any) {
+  const token = await AsyncStorage.getItem('token');
+  const response = await api.put(`/posts/${postId}`, post, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+}
+
 
 
 

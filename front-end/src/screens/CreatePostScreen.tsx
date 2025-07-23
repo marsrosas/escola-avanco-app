@@ -3,13 +3,18 @@ import {
   View,
   Text,
   TextInput,
-  Button,
+  TouchableOpacity,
   StyleSheet,
   Alert,
+  ScrollView,
+  Dimensions,
+  Image,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createPost } from '../services/postService';
 import { useNavigation } from '@react-navigation/native';
+
+const { width, height } = Dimensions.get('window');
 
 export default function CreatePostScreen() {
   const [title, setTitle] = useState('');
@@ -41,53 +46,176 @@ export default function CreatePostScreen() {
     }
   };
 
+  const handleCancel = () => {
+    navigation.goBack();
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Título da Aula</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite o título da aula"
-        value={title}
-        onChangeText={setTitle}
-      />
+    <ScrollView 
+      contentContainerStyle={{ 
+        flexGrow: 1,
+        backgroundColor: '#6d184e',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 40,
+        paddingHorizontal: 20
+      }}
+    >
+      <View style={styles.container}>
+        <Image
+          source={require('../../assets/logo-avanco.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+        
+        <Text style={styles.title}>
+          Nova <Text style={{ color: '#222' }}>Aula</Text>
+        </Text>
+        
+        <Text style={styles.subtitle}>
+          Crie uma nova aula para compartilhar conhecimento
+        </Text>
 
-      <Text style={styles.label}>Descrição</Text>
-      <TextInput
-        style={[styles.input, { height: 80 }]}
-        placeholder="Descrição da aula"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
+        <View style={styles.formContainer}>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Título da Aula</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Digite o título da aula"
+              placeholderTextColor="#999"
+              value={title}
+              onChangeText={setTitle}
+            />
+          </View>
 
-      <Text style={styles.label}>Matéria / Disciplina</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite a matéria"
-        value={subject}
-        onChangeText={setSubject}
-      />
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Matéria / Disciplina</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Ex: Matemática, História, Português..."
+              placeholderTextColor="#999"
+              value={subject}
+              onChangeText={setSubject}
+            />
+          </View>
 
-      <Button title="Criar Postagem" onPress={handleSubmit} />
-    </View>
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Descrição</Text>
+            <TextInput
+              style={[styles.input, styles.textArea]}
+              placeholder="Descreva o conteúdo da aula, objetivos e tópicos que serão abordados..."
+              placeholderTextColor="#999"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+              <Text style={styles.submitButtonText}>Criar Aula</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    flex: 1,
+    backgroundColor: '#f7eaea',
+    borderRadius: 16,
+    padding: 32,
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    minHeight: height * 0.7
+  },
+  logo: {
+    width: 64,
+    height: 64,
+    marginBottom: 16
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#6d184e',
+    marginBottom: 8,
+    textAlign: 'center'
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#444',
+    marginBottom: 24,
+    textAlign: 'center',
+    lineHeight: 22
+  },
+  formContainer: {
+    width: '100%'
+  },
+  inputGroup: {
+    marginBottom: 20
   },
   label: {
-    marginTop: 16,
     fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+    fontSize: 16
   },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
-    marginTop: 8,
-    padding: 10,
     borderRadius: 6,
+    padding: 12,
+    backgroundColor: '#fff',
+    fontSize: 16,
+    color: '#333'
   },
+  textArea: {
+    height: 100,
+    textAlignVertical: 'top'
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    gap: 12
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: '#ccc',
+    borderRadius: 6,
+    paddingVertical: 14,
+    alignItems: 'center'
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontWeight: 'bold',
+    fontSize: 16
+  },
+  submitButton: {
+    flex: 1,
+    backgroundColor: '#6d184e',
+    borderRadius: 6,
+    paddingVertical: 14,
+    alignItems: 'center'
+  },
+  submitButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 16
+  }
 });
 

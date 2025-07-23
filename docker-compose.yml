@@ -1,0 +1,46 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: escola-avanco-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: escola-avanco
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - escola-avanco-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: escola-avanco-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: mongodb://mongodb:27017/escola-avanco
+      JWT_SECRET: escola_avanco_jwt_secret_key_2025
+      PORT: 3000
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - escola-avanco-network
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  escola-avanco-network:
+    driver: bridge

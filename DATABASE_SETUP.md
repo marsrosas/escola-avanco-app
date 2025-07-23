@@ -57,6 +57,8 @@ npm run dev          # Iniciar API em modo desenvolvimento
 | Username | Senha | Papel | Descrição |
 |----------|-------|-------|-----------|
 | `Livia Moura` | `123456` | Professor | Pode criar/editar/excluir aulas |
+| `Guilherme Santana` | `123456` | Professor | Pode criar/editar/excluir aulas |
+| `Marselle Rosas` | `123456` | Professor | Pode criar/editar/excluir aulas |
 | `aluno1` | `123456` | Aluno | Pode apenas visualizar aulas |
 
 > ⚠️ **Importante:** Não inclua espaços após o username!

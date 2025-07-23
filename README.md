@@ -82,6 +82,8 @@ A aplicação utiliza **MongoDB** como banco de dados NoSQL, com **Mongoose** co
 | Username | Senha | Papel | Descrição |
 |----------|-------|-------|-----------|
 | `Livia Moura` | `123456` | Professor | Pode criar, editar e excluir aulas |
+| `Guilherme Santana` | `123456` | Professor | Pode criar, editar e excluir aulas |
+| `Marselle Rosas` | `123456` | Professor | Pode criar, editar e excluir aulas |
 | `aluno1` | `123456` | Aluno | Pode apenas visualizar aulas |
 
 > **⚠️ Nota:** Não inclua espaço após a digitação do username!

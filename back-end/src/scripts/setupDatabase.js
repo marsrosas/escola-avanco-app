@@ -31,6 +31,16 @@ async function setupDatabase() {
           role: 'professor'
         },
         {
+          username: 'Guilherme Santana',
+          password: '123456',
+          role: 'professor'
+        },
+        {
+          username: 'Marselle Rosas',
+          password: '123456',
+          role: 'professor'
+        },
+        {
           username: 'aluno1',
           password: '123456',
           role: 'aluno'
@@ -95,7 +105,10 @@ async function setupDatabase() {
     console.log(`   - Posts: ${finalPostCount}`);
     console.log('');
     console.log('🔐 Credenciais para teste:');
-    console.log('   Professor: "Livia Moura" / "123456"');
+    console.log('   Professores:');
+    console.log('     "Livia Moura" / "123456"');
+    console.log('     "Guilherme Santana" / "123456"');
+    console.log('     "Marselle Rosas" / "123456"');
     console.log('   Aluno: "aluno1" / "123456"');
     console.log('');
     console.log('💡 Para testar a API, execute: npm run dev');

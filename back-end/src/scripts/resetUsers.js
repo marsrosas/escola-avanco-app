@@ -20,6 +20,16 @@ async function resetUsers() {
         role: 'professor'
       },
       {
+        username: 'Guilherme Santana',
+        password: '123456',
+        role: 'professor'
+      },
+      {
+        username: 'Marselle Rosas',
+        password: '123456',
+        role: 'professor'
+      },
+      {
         username: 'aluno1',
         password: '123456',
         role: 'aluno'

@@ -16,25 +16,52 @@ escola-avanco-app/
 ├── back-end/                    # API RESTful (Node.js + Express + MongoDB)
 │   ├── src/
 │   │   ├── config/              # Configurações (database, seedDatabase)
+│   │   ├── database/            # Gerenciamento de dados (posts.json, postsManager)
 │   │   ├── models/              # Modelos do Mongoose (User, Post)
-│   │   ├── routes/              # Rotas da API (auth, posts, students, teachers)
+│   │   ├── routes/              # Rotas da API
+│   │   │   ├── auth.routes.js   # Autenticação e registro
+│   │   │   ├── posts.routes.js  # CRUD de aulas/posts
+│   │   │   ├── students.routes.js # Rotas específicas para alunos
+│   │   │   ├── teachers.routes.js # Rotas específicas para professores
+│   │   │   └── admin.routes.js  # Rotas administrativas (CRUD usuários)
 │   │   ├── middlewares/         # Middlewares (auth, role)
-│   │   ├── scripts/             # Scripts utilitários (reset, debug)
+│   │   ├── scripts/             # Scripts utilitários (reset, debug, setup)
 │   │   └── index.js             # Entrada da aplicação
 │   ├── package.json             # Dependências do back-end
 │   └── .env                     # Variáveis de ambiente
 ├── front-end/                   # Aplicação Mobile (React Native + Expo)
 │   ├── src/
 │   │   ├── screens/             # Telas da aplicação
-│   │   ├── services/            # Serviços de API (auth, posts)
+│   │   │   ├── LoginScreen.tsx  # Tela de login
+│   │   │   ├── HomeScreen.tsx   # Lista de aulas
+│   │   │   ├── CreatePostScreen.tsx # Criar nova aula
+│   │   │   ├── TeacherHomeScreen.tsx # Dashboard do professor
+│   │   │   ├── StudentHomeScreen.tsx # Dashboard do aluno
+│   │   │   ├── ProfessoresListScreen.tsx # Lista de professores
+│   │   │   ├── CreateProfessorScreen.tsx # Criar professor
+│   │   │   ├── EditProfessorScreen.tsx # Editar professor
+│   │   │   ├── AlunosListScreen.tsx # Lista de alunos
+│   │   │   ├── CreateAlunoScreen.tsx # Criar aluno
+│   │   │   └── EditAlunoScreen.tsx # Editar aluno
+│   │   ├── services/            # Serviços de API
+│   │   │   ├── authService.ts   # Autenticação
+│   │   │   ├── postService.ts   # Gerenciamento de posts
+│   │   │   └── adminService.ts  # Funcionalidades administrativas
 │   │   └── navigation/          # Navegação entre telas
+│   │       └── AppNavigator.tsx # Configuração de rotas
 │   ├── assets/                  # Imagens e recursos
-│   └── package.json             # Dependências do front-end
+│   │   ├── logo-avanco.png      # Logo da aplicação
+│   │   ├── icon.png             # Ícone do app
+│   │   └── splash-icon.png      # Ícone de splash screen
+│   ├── app.json                 # Configurações do Expo
+│   ├── package.json             # Dependências do front-end
+│   └── tsconfig.json            # Configurações TypeScript
 ├── docker-compose.yml           # Orquestração completa (MongoDB + API)
 ├── docker-compose.dev.yml       # Apenas MongoDB para desenvolvimento
 ├── Dockerfile                   # Build da API
 ├── .dockerignore               # Arquivos ignorados no build
 ├── .gitignore                  # Arquivos ignorados no Git
+├── DATABASE_SETUP.md           # Documentação do banco de dados
 └── README.md                   # Este arquivo
 ```
 
@@ -86,7 +113,7 @@ A aplicação utiliza **MongoDB** como banco de dados NoSQL, com **Mongoose** co
 | `Marselle Rosas` | `123456` | Professor | Pode criar, editar e excluir aulas |
 | `aluno1` | `123456` | Aluno | Pode apenas visualizar aulas |
 
-> **⚠️ Nota:** Não inclua espaço após a digitação do username!
+> **Nota:** O sistema cria automaticamente todos os usuários listados acima na primeira execução. As credenciais são exibidas no terminal do back-end durante a inicialização para facilitar os testes.
 
 ---
 
@@ -103,6 +130,10 @@ Construída com **React Native** e **Expo**, seguindo os padrões de desenvolvim
 - Criar novas aulas com título, descrição e matéria
 - Editar suas próprias aulas
 - Excluir suas próprias aulas
+- **Funcionalidades Administrativas:**
+  - Gerenciar professores (listar, criar, editar, excluir)
+  - Gerenciar alunos (listar, criar, editar, excluir)
+  - Acesso completo ao sistema de administração
 
 **Alunos:**
 - Login com autenticação JWT
@@ -113,13 +144,29 @@ Construída com **React Native** e **Expo**, seguindo os padrões de desenvolvim
 Construída com **Node.js** e **Express**, seguindo arquitetura MVC e boas práticas de segurança:
 
 **Rotas Implementadas:**
+
+**Autenticação:**
 - `POST /api/login` - Autenticação de usuários
 - `POST /api/register` - Registro de novos usuários
+
+**Gerenciamento de Aulas/Posts:**
 - `GET /api/posts` - Listar todas as aulas (protegida)
 - `POST /api/posts` - Criar nova aula (protegida - apenas professores)
 - `GET /api/posts/:id` - Buscar aula específica (protegida)
 - `PUT /api/posts/:id` - Editar aula (protegida - apenas autor ou professor)
 - `DELETE /api/posts/:id` - Excluir aula (protegida - apenas autor ou professor)
+
+**Rotas Administrativas:**
+- `GET /api/admin/professores` - Listar professores (protegida - apenas professores)
+- `POST /api/admin/professores` - Criar novo professor (protegida - apenas professores)
+- `GET /api/admin/professores/:id` - Buscar professor específico (protegida)
+- `PUT /api/admin/professores/:id` - Editar professor (protegida - apenas professores)
+- `DELETE /api/admin/professores/:id` - Excluir professor (protegida - apenas professores)
+- `GET /api/admin/alunos` - Listar alunos (protegida - apenas professores)
+- `POST /api/admin/alunos` - Criar novo aluno (protegida - apenas professores)
+- `GET /api/admin/alunos/:id` - Buscar aluno específico (protegida)
+- `PUT /api/admin/alunos/:id` - Editar aluno (protegida - apenas professores)
+- `DELETE /api/admin/alunos/:id` - Excluir aluno (protegida - apenas professores)
 
 **Segurança Implementada:**
 - **Autenticação JWT** com expiração de 24h
@@ -226,11 +273,12 @@ npm start
 > **⚠️ Nota:** O QR Code frequentemente apresenta problemas de conectividade. O teste via navegador oferece melhor experiência para avaliação.
 
 #### **6. Testar a aplicação**
-- **Acesse:** http://localhost:8081 (ou escaneie QR Code)
-- **Login Professor:** `Livia Moura` / `123456`
+- **Login Professor:** `Livia Moura` / `123456` (ou qualquer professor listado no terminal)
 - **Login Aluno:** `aluno1` / `123456`
 
-### *Para parar**
+> **💡 Dica:** As credenciais completas de todos os usuários são exibidas no terminal do back-end quando o servidor inicia, facilitando os testes com diferentes usuários.
+
+### **7. Para parar**
 ```bash
 # Parar MongoDB
 docker-compose -f docker-compose.dev.yml down

@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../navigation/AppNavigator';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
+type TeacherHomeScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'ProfessorHome'>;
+
 export default function TeacherHomeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<TeacherHomeScreenNavigationProp>();
   const [username, setUsername] = useState('');
 
   useEffect(() => {
@@ -101,7 +105,7 @@ export default function TeacherHomeScreen() {
               shadowOpacity: 0.22,
               shadowRadius: 2.22,
             }}
-            onPress={() => navigation.navigate('Home' as never)}
+            onPress={() => navigation.navigate('Home')}
           >
             <Text style={{ 
               color: '#fff', 
@@ -128,7 +132,7 @@ export default function TeacherHomeScreen() {
               shadowOpacity: 0.22,
               shadowRadius: 2.22,
             }}
-            onPress={() => navigation.navigate('CreatePost' as never)}
+            onPress={() => navigation.navigate('CreatePost')}
           >
             <Text style={{ 
               color: '#6d184e', 
@@ -138,6 +142,67 @@ export default function TeacherHomeScreen() {
               CRIAR NOVA AULA
             </Text>
           </TouchableOpacity>
+
+          {/* Seção Administrativa */}
+          <View style={{
+            marginTop: 24,
+            paddingTop: 24,
+            borderTopWidth: 1,
+            borderTopColor: '#ddd',
+            width: '100%'
+          }}>
+            <Text style={{ 
+              fontSize: 18, 
+              fontWeight: 'bold', 
+              color: '#6d184e', 
+              marginBottom: 16,
+              textAlign: 'center'
+            }}>
+              Administração
+            </Text>
+
+            <View style={{ gap: 12 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#28a745',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  paddingHorizontal: 20,
+                  width: '100%',
+                  alignItems: 'center',
+                }}
+                onPress={() => navigation.navigate('ProfessoresList')}
+              >
+                <Text style={{ 
+                  color: '#fff', 
+                  fontWeight: 'bold', 
+                  fontSize: 14 
+                }}>
+                  GERENCIAR PROFESSORES
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  backgroundColor: '#17a2b8',
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  paddingHorizontal: 20,
+                  width: '100%',
+                  alignItems: 'center',
+                }}
+                onPress={() => navigation.navigate('AlunosList')}
+              >
+                <Text style={{ 
+                  color: '#fff', 
+                  fontWeight: 'bold', 
+                  fontSize: 14 
+                }}>
+                  GERENCIAR ALUNOS
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </View>
     </ScrollView>

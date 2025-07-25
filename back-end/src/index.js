@@ -19,12 +19,14 @@ const authRoutes = require('./routes/auth.routes');
 const postsRoutes = require('./routes/posts.routes');
 const teacherRoutes = require('./routes/teachers.routes');
 const studentRoutes = require('./routes/students.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 // Registro das rotas
 app.use('/api', authRoutes);
 app.use('/api', postsRoutes);
 app.use('/api', teacherRoutes);
 app.use('/api', studentRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Rota simples de health check
 app.get('/', (req, res) => {

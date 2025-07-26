@@ -55,10 +55,14 @@ type Aluno = {
   updatedAt: string;
 };
 
-export default function AppNavigator() {
+interface AppNavigatorProps {
+  initialRoute?: keyof RootStackParamList;
+}
+
+export default function AppNavigator({ initialRoute = 'Login' }: AppNavigatorProps) {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'Escola Avanço' }} />
         <Stack.Screen name="CreatePost" component={CreatePostScreen} options={{ title: 'Criar Aula' }} />

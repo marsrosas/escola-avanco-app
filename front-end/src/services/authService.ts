@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://172.25.61.227:3000/api' // IP do seu WSL
+  baseURL: 'http://localhost:3000/api' // Funciona para todos
 });
 
 export async function login(username: string, password: string) {

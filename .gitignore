@@ -1,6 +1,5 @@
 # Geral
 node_modules/
-.env
 *.log
 
 # React Native

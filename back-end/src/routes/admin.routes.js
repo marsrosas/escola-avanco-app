@@ -123,7 +123,7 @@ router.put('/professores/:id', async (req, res) => {
       return res.status(404).json({ message: 'Professor não encontrado' });
     }
 
-    // Verificar se o username já existe (exceto para o próprio professor)
+    // Verificar se o username já existe (exceto para o professor que está sendo editado)
     if (username !== professor.username) {
       const existingUser = await User.findOne({ username });
       if (existingUser) {
@@ -301,7 +301,7 @@ router.put('/alunos/:id', async (req, res) => {
       return res.status(404).json({ message: 'Aluno não encontrado' });
     }
 
-    // Verificar se o username já existe (exceto para o próprio aluno)
+    // Verificar se o username já existe (exceto para o aluno que está sendo editado)
     if (username !== aluno.username) {
       const existingUser = await User.findOne({ username });
       if (existingUser) {

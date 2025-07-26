@@ -222,6 +222,8 @@ Otimiza o build Docker ignorando:
 - `node_modules`, logs, arquivos de desenvolvimento
 - Documentação e arquivos de configuração desnecessários
 
+> **⚠️ Nota:** O arquivo `.env` também é **incluído nas imagens Docker** (removido do `.dockerignore`) para garantir que os containers funcionem corretamente quando executados via `docker-compose up`. Isso permite que qualquer pessoa execute o projeto completo com um único comando, sem necessidade de configuração manual de variáveis de ambiente. Em ambiente corporativo, essas variáveis seriam injetadas durante o deploy através de sistemas de CI/CD ou orquestradores como Kubernetes.
+
 ---
 
 ## Como Executar o Projeto
@@ -287,6 +289,79 @@ docker-compose -f docker-compose.dev.yml down
 ```bash
 # Parar servidores em cada terminal (front e back end)
 Ctrl+C 
+```
+
+---
+
+## Solução de Problemas
+
+### **🔧 Problemas Comuns e Soluções**
+
+#### **MongoDB não conecta**
+```bash
+# Verificar se MongoDB está rodando
+docker ps | grep mongo
+
+# Se não estiver, iniciar:
+docker-compose -f docker-compose.dev.yml up -d
+
+# Aguardar 30 segundos para inicialização
+```
+
+#### **"Usuário não encontrado" no login**
+- ✅ Verifique se digitou **exatamente** (sem espaços): `Livia Moura`
+- ✅ Use as credenciais exibidas no terminal do back-end
+- ✅ Senha sempre: `123456`
+
+#### **Botões de navegação não funcionam**
+```bash
+# Limpar cache do Expo (no front-end)
+cd front-end
+rm -rf .expo .metro node_modules/.cache
+npm install
+npm start --clear
+```
+
+#### **Erro de JWT/Token**
+- ✅ Verifique se arquivo `.env` existe no `back-end/`
+- ✅ Reinicie a API: `Ctrl+C` + `npm run dev`
+
+#### **API não responde**
+```bash
+# Testar se API está funcionando
+curl http://localhost:3000/
+# Deve retornar: "Escola Avanço API is running!"
+```
+
+#### **Front-end não carrega**
+```bash
+# No diretório front-end
+npm install
+npm start
+# Pressione 'w' para abrir no navegador
+```
+
+### **🚨 Reset Completo (último recurso)**
+```bash
+# 1. Parar tudo
+docker-compose -f docker-compose.dev.yml down
+
+# 2. Limpar dados (ATENÇÃO: apaga banco)
+docker-compose -f docker-compose.dev.yml down -v
+
+# 3. Reiniciar MongoDB
+docker-compose -f docker-compose.dev.yml up -d
+
+# 4. Aguardar inicialização
+sleep 30
+
+# 5. Reiniciar back-end
+cd back-end
+npm run dev
+
+# 6. Reiniciar front-end (novo terminal)
+cd front-end
+npm start
 ```
 
 ---

@@ -145,7 +145,17 @@ export default function ProfessoresListScreen() {
       }
 
       const newProfessor = await createProfessor(token, { username: formUsername, password: formPassword });
-      setProfessores([...professores, newProfessor]);
+      
+      // Garantir que o objeto tem as propriedades necessárias com valores válidos
+      const professorFormatted = {
+        _id: newProfessor._id || newProfessor.id || Math.random().toString(),
+        username: newProfessor.username || formUsername,
+        role: newProfessor.role || 'teacher',
+        createdAt: newProfessor.createdAt || new Date().toISOString(),
+        updatedAt: newProfessor.updatedAt || new Date().toISOString(),
+      };
+      
+      setProfessores([...professores, professorFormatted]);
       setCreateModalVisible(false);
       Alert.alert('Sucesso', 'Professor criado com sucesso!');
     } catch (error: any) {
@@ -206,11 +216,22 @@ export default function ProfessoresListScreen() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+    try {
+      if (!dateString) return 'Data não disponível';
+      
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch (error) {
+      return 'Data inválida';
+    }
   };
 
   const renderProfessor = ({ item }: { item: Professor }) => (

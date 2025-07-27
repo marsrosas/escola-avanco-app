@@ -145,7 +145,17 @@ export default function AlunosListScreen() {
       }
 
       const newAluno = await createAluno(token, { username: formUsername, password: formPassword });
-      setAlunos([...alunos, newAluno]);
+      
+      // Garantir que o objeto tem as propriedades necessárias com valores válidos
+      const alunoFormatted = {
+        _id: newAluno._id || newAluno.id || Math.random().toString(),
+        username: newAluno.username || formUsername,
+        role: newAluno.role || 'student',
+        createdAt: newAluno.createdAt || new Date().toISOString(),
+        updatedAt: newAluno.updatedAt || new Date().toISOString(),
+      };
+      
+      setAlunos([...alunos, alunoFormatted]);
       setCreateModalVisible(false);
       Alert.alert('Sucesso', 'Aluno criado com sucesso!');
     } catch (error: any) {
@@ -206,11 +216,22 @@ export default function AlunosListScreen() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-    });
+    try {
+      if (!dateString) return 'Data não disponível';
+      
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      
+      return date.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+    } catch (error) {
+      return 'Data inválida';
+    }
   };
 
   const renderAluno = ({ item }: { item: Aluno }) => (

@@ -64,7 +64,6 @@ escola-avanco-app/
 │   ├── package.json             # Dependências do front-end
 │   ├── package-lock.json        # Lock das versões das dependências
 │   ├── tsconfig.json            # Configurações TypeScript
-│   ├── metro.config.js          # Configurações do Metro bundler
 │   ├── App.tsx                  # Componente principal
 │   ├── index.ts                 # Ponto de entrada
 │   └── .env                     # Variáveis de ambiente do front-end

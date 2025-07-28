@@ -16,18 +16,21 @@ escola-avanco-app/
 ├── back-end/                    # API RESTful (Node.js + Express + MongoDB)
 │   ├── src/
 │   │   ├── config/              # Configurações (database, seedDatabase)
-│   │   ├── database/            # Gerenciamento de dados (posts.json, postsManager)
+│   │   │   ├── database.js      # Configuração do MongoDB
+│   │   │   └── seedDatabase.js  # Script de população inicial
 │   │   ├── models/              # Modelos do Mongoose (User, Post)
+│   │   │   ├── User.js          # Modelo de usuários
+│   │   │   └── Post.js          # Modelo de posts/aulas
 │   │   ├── routes/              # Rotas da API
 │   │   │   ├── auth.routes.js   # Autenticação e registro
 │   │   │   ├── posts.routes.js  # CRUD de aulas/posts
-│   │   │   ├── students.routes.js # Rotas específicas para alunos
-│   │   │   ├── teachers.routes.js # Rotas específicas para professores
 │   │   │   └── admin.routes.js  # Rotas administrativas (CRUD usuários)
 │   │   ├── middlewares/         # Middlewares (auth, role)
-│   │   ├── scripts/             # Scripts utilitários (reset, debug, setup)
+│   │   │   ├── auth.middleware.js # Middleware de autenticação
+│   │   │   └── role.middleware.js # Middleware de autorização
 │   │   └── index.js             # Entrada da aplicação
 │   ├── package.json             # Dependências do back-end
+│   ├── package-lock.json        # Lock das versões das dependências
 │   └── .env                     # Variáveis de ambiente
 ├── front-end/                   # Aplicação Mobile (React Native + Expo)
 │   ├── src/
@@ -47,21 +50,29 @@ escola-avanco-app/
 │   │   │   ├── authService.ts   # Autenticação
 │   │   │   ├── postService.ts   # Gerenciamento de posts
 │   │   │   └── adminService.ts  # Funcionalidades administrativas
-│   │   └── navigation/          # Navegação entre telas
-│   │       └── AppNavigator.tsx # Configuração de rotas
+│   │   ├── navigation/          # Navegação entre telas
+│   │   │   └── AppNavigator.tsx # Configuração de rotas
+│   │   └── config/              # Configurações
+│   │       └── api.ts           # Configuração da API
 │   ├── assets/                  # Imagens e recursos
 │   │   ├── logo-avanco.png      # Logo da aplicação
 │   │   ├── icon.png             # Ícone do app
-│   │   └── splash-icon.png      # Ícone de splash screen
+│   │   ├── splash-icon.png      # Ícone de splash screen
+│   │   ├── adaptive-icon.png    # Ícone adaptativo
+│   │   └── favicon.png          # Favicon
 │   ├── app.json                 # Configurações do Expo
 │   ├── package.json             # Dependências do front-end
-│   └── tsconfig.json            # Configurações TypeScript
+│   ├── package-lock.json        # Lock das versões das dependências
+│   ├── tsconfig.json            # Configurações TypeScript
+│   ├── metro.config.js          # Configurações do Metro bundler
+│   ├── App.tsx                  # Componente principal
+│   ├── index.ts                 # Ponto de entrada
+│   └── .env                     # Variáveis de ambiente do front-end
 ├── docker-compose.yml           # Orquestração completa (MongoDB + API)
 ├── docker-compose.dev.yml       # Apenas MongoDB para desenvolvimento
 ├── Dockerfile                   # Build da API
 ├── .dockerignore               # Arquivos ignorados no build
 ├── .gitignore                  # Arquivos ignorados no Git
-├── DATABASE_SETUP.md           # Documentação do banco de dados
 └── README.md                   # Este arquivo
 ```
 
@@ -108,13 +119,12 @@ A aplicação utiliza **MongoDB** como banco de dados NoSQL, com **Mongoose** co
 #### **Usuários Pré-cadastrados - Credenciais para Teste:**
 | Username | Senha | Papel | Descrição |
 |----------|-------|-------|-----------|
-| `Livia Moura` | `123456` | Professor | Pode criar, editar e excluir aulas, alunos e outros professores |
-| `Guilherme Santana` | `123456` | Professor | Pode criar, editar e excluir aulas, alunos e outros professores |
-| `Marselle Rosas` | `123456` | Professor | Pode criar, editar e excluir aulas, alunos e outros professores |
-| `aluno1` | `123456` | Aluno | Pode apenas visualizar aulas |
+| `Livia Moura` | `123456` | Professor | Pode criar, editar e excluir aulas, alunos e outros professores, além de buscar aulas por palavras-chave |
+| `Guilherme Santana` | `123456` | Professor | Pode criar, editar e excluir aulas, alunos e outros professores, além de buscar aulas por palavras-chave |
+| `Marselle Rosas` | `123456` | Professor | Pode criar, editar e excluir aulas, alunos e outros professores, além de buscar aulas por palavras-chave |
+| `aluno1` | `123456` | Aluno | Pode apenas visualizar aulas e buscá-las por palavras-chave|
 
-> **Nota:** O sistema cria automaticamente todos os usuários listados acima na primeira execução.
-
+> **Nota:** O sistema cria automaticamente todos os usuários listados acima na primeira execução. 
 ---
 
 ## Arquitetura do Projeto
@@ -130,15 +140,15 @@ Construída com **React Native** e **Expo**, seguindo os padrões de desenvolvim
 - Criar novas aulas com título, descrição e matéria
 - Editar suas próprias aulas
 - Excluir suas próprias aulas
+- Filtrar aulas por palavras-chave
 - **Funcionalidades Administrativas:**
   - Gerenciar professores (listar, criar, editar, excluir)
   - Gerenciar alunos (listar, criar, editar, excluir)
-  - Acesso completo ao sistema de administração
 
 **Alunos:**
 - Login com autenticação JWT
 - Visualizar lista de todas as aulas (somente leitura)
-- Filtrar aulas por conteúdo
+- Filtrar aulas por palavras-chave
 
 ### **API RESTful (Back-end)**
 Construída com **Node.js** e **Express**, seguindo arquitetura MVC e boas práticas de segurança:
@@ -201,8 +211,8 @@ Construída com **Node.js** e **Express**, seguindo arquitetura MVC e boas prát
 > - **Facilitar o entendimento** da estrutura do projeto completo
 > - **Simplificar a execução** para que professores e alunos possam testar a aplicação sem necessidade de múltiplos repositórios
 > - **Demonstrar claramente a integração** entre as duas partes da aplicação para fins de aprendizado
-> **Agilizar a avaliação** tornando o processo de entrega e correção mais simples para os docentes
-> **Acesso completo** para que qualquer pessoa que clone o projeto tenha acesso a todo o ecossistema da aplicação em um único lugar
+> - **Agilizar a avaliação** tornando o processo de entrega e correção mais simples para os docentes
+> - **Acesso completo** para que qualquer pessoa que clone o projeto tenha acesso a todo o ecossistema da aplicação em um único lugar
 
 ---
 
@@ -275,10 +285,8 @@ npm start
 > **⚠️ Nota:** O QR Code frequentemente apresenta problemas de conectividade. O teste via navegador oferece melhor experiência para avaliação.
 
 #### **6. Testar a aplicação**
-- **Login Professor:** `Livia Moura` / `123456` (ou qualquer professor listado no terminal)
+- **Login Professor:** `Livia Moura` / `123456` (ou qualquer professor listado na documentação)
 - **Login Aluno:** `aluno1` / `123456`
-
-> **💡 Dica:** As credenciais completas de todos os usuários são exibidas no terminal do back-end quando o servidor inicia, facilitando os testes com diferentes usuários.
 
 ### **7. Para parar**
 ```bash
@@ -289,6 +297,78 @@ docker-compose -f docker-compose.dev.yml down
 ```bash
 # Parar servidores em cada terminal (front e back end)
 Ctrl+C 
+```
+
+---
+
+## Solução de Problemas
+
+### **🔧 Problemas Comuns e Soluções**
+
+#### **MongoDB não conecta**
+```bash
+# Verificar se MongoDB está rodando
+docker ps | grep mongo
+
+# Se não estiver, iniciar:
+docker-compose -f docker-compose.dev.yml up -d
+
+# Aguardar 30 segundos para inicialização
+```
+
+#### **"Usuário não encontrado" no login**
+- Verifique se digitou o username **corretamente** 
+- Senha sempre: `123456`
+
+#### **Botões de navegação não funcionam**
+```bash
+# Limpar cache do Expo (no front-end)
+cd front-end
+rm -rf .expo .metro node_modules/.cache
+npm install
+npm start --clear
+```
+
+#### **Erro de JWT/Token**
+- Verifique se arquivo `.env` existe no `back-end/`
+- Reinicie a API: `Ctrl+C` + `npm run dev`
+
+#### **API não responde**
+```bash
+# Testar se API está funcionando
+curl http://localhost:3000/
+# Deve retornar uma mensagem indicando que a API está funcionando
+```
+
+#### **Front-end não carrega**
+```bash
+# No diretório front-end
+npm install
+npm start
+# Pressione 'w' para abrir no navegador
+```
+
+### **🚨 Reset Completo (último recurso)**
+```bash
+# 1. Parar tudo
+docker-compose -f docker-compose.dev.yml down
+
+# 2. Limpar dados (ATENÇÃO: apaga banco)
+docker-compose -f docker-compose.dev.yml down -v
+
+# 3. Reiniciar MongoDB
+docker-compose -f docker-compose.dev.yml up -d
+
+# 4. Aguardar inicialização
+sleep 30
+
+# 5. Reiniciar back-end
+cd back-end
+npm run dev
+
+# 6. Reiniciar front-end (novo terminal)
+cd front-end
+npm start
 ```
 
 ---
